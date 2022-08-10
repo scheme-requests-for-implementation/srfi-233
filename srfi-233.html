@@ -80,6 +80,81 @@ is written.  If the argument is a single string, it is prefixed by <code>&quot;;
 In either case, the accumulator returns an unspecified value.
 If the argument is an end-of-file object, <em>outport</em> is closed and the end-of-file object is returned.</p>
 
+<h2 id="example">Example</h2>
+<p>The following is an example of an INI file:
+
+<pre>
+; Be sure to update the following line
+last_modified_date=2022-08-10
+
+[other]
+quiet=/qa
+
+[install]
+allusers=true
+as_admin_username=admin
+as_instance=localhost
+applicationusers=allusers
+cadnode=businessabcdef
+cadport=6410
+clientauditingport=6420
+clientlanguage=en
+clustercms=false
+databasedb=boe120
+databasepwd_sqlanywhereroot=password1
+databaseserver_audit=localhost
+enablelogfile=true
+enableservers=true
+install.lp.en.selected=true
+install.lp.fr.selected=true
+installdbtype=sql
+installmode=new
+installswitch=server
+install_db_type=sqlanywhere
+mysqlport=3306
+nsport=6400
+privileged=true
+username=business objects
+website_metabase_number=true
+
+[features]
+remove=wcadotnet,webapplicationcontainer
+</pre>
+
+<p>Calling <code>make-ini-file-generator</code> on
+a character input stream containing this example will
+return a generator which generates the following lists:
+
+<pre>
+("" "last_modified_date", "2022-08-10")
+("other" "quiet" "/qa")
+("install" "allusers" "true")
+("install" "as_admin_username" "admin")
+("install" "as_instance" "localhost")
+("install" "applicationusers" "allusers")
+("install" "cadnode" "businessabcdef")
+("install" "cadport" "6410")
+("install" "clientauditingport" "6420")
+("install" "clientlanguage" "en")
+("install" "clustercms" "false")
+("install" "databasedb" "boe120")
+("install" "databasepwd_sqlanywhereroot" "password1")
+("install" "databaseserver_audit" "localhost")
+("install" "enablelogfile" "true")
+("install" "enableservers" "true")
+("install" "install.lp.en.selected" "true")
+("install" "install.lp.fr.selected" "true")
+("install" "installdbtype" "sql")
+("install" "installmode" "new")
+("install" "installswitch" "server")
+("install" "install_db_type" "sqlanywhere")
+("install" "mysqlport" "3306")
+("install" "nsport" "6400")
+("install" "privileged" "true")
+("install" "username" "business objects")
+("install" "website_metabase_number" "true")
+("features" "remove" "wcadotnet,webapplicationcontainer")
+</pre>
 
 <h2 id="implementation">Implementation</h2>
 
