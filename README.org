@@ -4,7 +4,7 @@
 
 
 
-keywords: [[https://srfi.schemers.org/?keywords=syntax][Syntax]]
+keywords: [[https://srfi.schemers.org/?keywords=i/o][I/O]]
 
 This repository hosts [[https://srfi.schemers.org/srfi-233/][SRFI 233]]: INI files, a [[https://srfi.schemers.org/][Scheme Request for Implementation]].
 
