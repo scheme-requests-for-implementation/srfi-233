@@ -1,8 +1,18 @@
-(define (make-ini-file-accumulator port)
+(define make-ini-file-accumulator
+  (case-lambda
+    ((port)
+     (make-accumulator port #\= #\;))
+    ((port key-value-sep)
+     (make-accumulator port key-value-sep #\;))
+    ((port key-value-sep comment-delim)
+     (make-accumulator port key-value-sep comment-delim))))
+
+(define (make-accumulator port key-value-sep comment-delim)
   (define current-section "")
 
   (define (write-comment str)
-    (display "; " port)
+    (display comment-delim port)
+    (display " " port)
     (display str port)
     (newline port))
 
@@ -14,7 +24,7 @@
       (display "]" port)
       (newline port))
     (display key port)
-    (display "=" port)
+    (display key-value-sep port)
     (display value port)
     (newline port))
 
@@ -38,8 +48,16 @@
      ((data-triple? arg) (apply write-data arg))
      (else (error "Unexpected input")))))
 
-(define (make-ini-file-generator port)
+(define make-ini-file-generator
+  ((port)
+   (make-generator port #\= #\;)
+  ((port key-value-sep)
+   (make-generator port key-value-sep #\;))
+  ((port key-value-sep comment-delim)
+   (make-generator port key-value-sep comment-delim))
 
+(define make-generator port key-value-sep comment-delim)
+  
   (define (trim-head line)
     (let loop ((chars (string->list line)))
       (cond
@@ -70,7 +88,7 @@
       (cond
        ((null? chars) #f)
        ((equal? (car chars) #\space) (loop (cdr chars)))
-       ((equal? (car chars) #\;) #t)
+       ((equal? (car chars) comment-delim) #t)
        (else #f))))
 
   (define (section line)
@@ -97,7 +115,7 @@
        ((null? chars)
         (cons (trim-tail (list->string (reverse key/rev)))
               (trim-head (list->string (reverse value/rev)))))
-       ((and (equal? (car chars) #\=)
+       ((and (equal? (car chars) key-value-sep)
              (not key-parsed))
         (loop (cdr chars)
               #t

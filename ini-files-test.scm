@@ -1,16 +1,16 @@
 (cond-expand
   (guile
    (import (scheme base)
-           (ini-files)
+           (srfi srfi-133)
            (srfi srfi-64)))
   (chibi
    (import (scheme base)
-           (ini-files)
+           (srfi 133)
            (rename (except (chibi test) test-equal)
                    (test test-equal))))
   (else
    (import (scheme base)
-           (ini-files)
+           (srfi 133)
            (srfi 64))))
 
 
