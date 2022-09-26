@@ -49,14 +49,15 @@
      (else (error "Unexpected input")))))
 
 (define make-ini-file-generator
-  ((port)
-   (make-generator port #\= #\;)
-  ((port key-value-sep)
-   (make-generator port key-value-sep #\;))
-  ((port key-value-sep comment-delim)
-   (make-generator port key-value-sep comment-delim))
+  (case-lambda
+    ((port)
+     (make-generator port #\= #\;))
+    ((port key-value-sep)
+     (make-generator port key-value-sep #\;))
+    ((port key-value-sep comment-delim)
+     (make-generator port key-value-sep comment-delim))))
 
-(define make-generator port key-value-sep comment-delim)
+(define (make-generator port key-value-sep comment-delim)
   
   (define (trim-head line)
     (let loop ((chars (string->list line)))
