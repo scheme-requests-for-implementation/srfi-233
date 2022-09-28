@@ -28,10 +28,6 @@
     (display value port)
     (newline port))
 
-  (define (close)
-    (close-output-port port)
-    (eof-object))
-
   (define (data-triple? arg)
     (and (list? arg)
          (= 3 (length arg))
@@ -43,7 +39,7 @@
 
   (lambda (arg)
     (cond
-     ((eof-object? arg) (close))
+     ((eof-object? arg) (eof-object))
      ((string? arg) (write-comment arg))
      ((data-triple? arg) (apply write-data arg))
      (else (error "Unexpected input")))))
@@ -144,7 +140,6 @@
          (when (eof-object? line)
            (begin
              (set! eof #t)
-             (close-input-port port)
              (k (eof-object))))
          (let ((trimmed-line (trim line)))
            (cond
