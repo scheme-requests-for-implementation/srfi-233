@@ -8,7 +8,7 @@
      (make-accumulator port key-value-sep comment-delim))))
 
 (define (make-accumulator port key-value-sep comment-delim)
-  (define current-section "")
+  (define current-section '||)
 
   (define (write-comment str)
     (display comment-delim port)
@@ -31,11 +31,9 @@
   (define (data-triple? arg)
     (and (list? arg)
          (= 3 (length arg))
-         (let loop ((arg arg))
-           (cond
-            ((null? arg) #t)
-            ((not (string? (car arg))) #f)
-            (else (loop (cdr arg)))))))
+         (symbol? (list-ref arg 0))
+         (symbol? (list-ref arg 1))
+         (string? (list-ref arg 2))))
 
   (lambda (arg)
     (cond
@@ -55,6 +53,7 @@
 
 (define (make-generator port key-value-sep comment-delim)
   
+  ;; remove whitespace from the start of the line
   (define (trim-head line)
     (let loop ((chars (string->list line)))
       (cond
@@ -62,6 +61,7 @@
        ((equal? #\space (car chars)) (loop (cdr chars)))
        (else (list->string chars)))))
 
+  ;; remove whitespace from the end of the line
   (define (trim-tail line)
     (let loop ((chars (string->list line))
                (chars/rev '())
@@ -80,6 +80,8 @@
   (define (trim line)
     (trim-tail (trim-head line)))
 
+  ;; return #t if the line is a comment,
+  ;; #f otherwise
   (define (comment line)
     (let loop ((chars (string->list line)))
       (cond
@@ -88,6 +90,8 @@
        ((equal? (car chars) comment-delim) #t)
        (else #f))))
 
+  ;; return section name as a symbol the line is a section declaration,
+  ;; #f otheriwse
   (define (section line)
     (define chars (string->list line))
     (define first (car chars))
@@ -98,36 +102,50 @@
            ((null? chars) #f)
            ((and (null? (cdr chars))
                  (equal? (car chars) #\]))
-            (list->string (reverse chars/rev)))
+            (string->symbol (list->string (reverse chars/rev))))
            (else (loop (cdr chars)
                        (cons (car chars) chars/rev)))))
         #f))
 
+  ;; return pair of key and value
+  ;;
+  ;; if line has a separator char, 
+  ;; key is a (whitespace trimmed) symbol up to first separator char, value is a (whitespace trimmed) string
+  ;;
+  ;; if line doesn't have a separator char
+  ;; key is a #f, value is the entire line
+  ;;
+  ;; if separator char is encounted multiple times, only first one is used to distinguish key from value
   (define (key-value line)
     (let loop ((chars (string->list line))
                (key-parsed #f)
-               (key/rev '())
-               (value/rev '()))
+               (first-reversed '())
+               (second-reversed '()))
       (cond
+       ;; line parsed, return
        ((null? chars)
-        (cons (trim-tail (list->string (reverse key/rev)))
-              (trim-head (list->string (reverse value/rev)))))
+        (if key-parsed
+          (cons (string->symbol (trim-tail (list->string (reverse first-reversed))))
+                (trim-head (list->string (reverse second-reversed))))
+          (cons #f (list->string (reverse first-reversed)))))
+       ;; encountered separator for first time
        ((and (equal? (car chars) key-value-sep)
              (not key-parsed))
         (loop (cdr chars)
               #t
-              key/rev
-              value/rev))
+              first-reversed
+              second-reversed))
+       ;; append char to either first or second, depending on if separator was seen
        (else (loop (cdr chars)
                    key-parsed
                    (if key-parsed
-                       key/rev
-                       (cons (car chars) key/rev))
+                       first-reversed
+                       (cons (car chars) first-reversed))
                    (if key-parsed
-                       (cons (car chars) value/rev)
-                       value/rev))))))
+                       (cons (car chars) second-reversed)
+                       second-reversed))))))
 
-  (define current-section "")
+  (define current-section '||)
   (define eof #f)
 
   (lambda ()

@@ -20,13 +20,13 @@
           (acc (make-ini-file-accumulator port)))
 
      ;; write leading section-less data
-     (acc '("" "key1" "value1"))
+     (acc '(|| key1 "value1"))
 
      ;; write comment
      (acc "test comment")
 
      ;; write new section
-     (acc '("section" "key2" "value2"))
+     (acc '(section key2 "value2"))
 
      (get-output-string port)))
 
@@ -59,10 +59,10 @@ key3\n
  (define result (read-to-list (make-ini-file-generator (open-input-string source))))
 
  (test-equal
-     '(("" "key1" "value1")
-       ("section" "key2" "value2")
-       ("section2" "key3" "")
-       ("section2" "[key]4" ""))
+     '((|| key1 "value1")
+       (section key2 "value2")
+       (section2 #f "key3")
+       (section2 #f "[key]4"))
    result))
 
 
@@ -74,13 +74,13 @@ key3\n
           (acc (make-ini-file-accumulator port #\- #\#)))
 
      ;; write leading section-less data
-     (acc '("" "key1" "value1"))
+     (acc '(|| key1 "value1"))
 
      ;; write comment
      (acc "test comment")
 
      ;; write new section
-     (acc '("section" "key2" "value2"))
+     (acc '(section key2 "value2"))
 
      (get-output-string port)))
 
@@ -113,10 +113,10 @@ key3\n
  (define result (read-to-list (make-ini-file-generator (open-input-string source) #\- #\#)))
 
  (test-equal
-     '(("" "key1" "value1")
-       ("section" "key2" "value2")
-       ("section2" "key3" "")
-       ("section2" "[key]4" ""))
+     '((|| key1 "value1")
+       (section key2 "value2")
+       (section2 #f "key3")
+       (section2 #f "[key]4"))
    result))
 
 (test-end)
