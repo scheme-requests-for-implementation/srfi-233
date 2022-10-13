@@ -74,7 +74,7 @@ Sections do not nest.  The name of a section is the characters between the brack
 they precede any section line, as key-value pairs belonging to a section
 whose name is the empty string.
 Whitespace immediately before or after the <code>=</code> is ignored.
-If there is more than one key-value separator, alll but the first are considered part of the value.
+If there is more than one key-value separator, all but the first are considered part of the value.
 The key-value separator can be overridden.</p>
 </li>
 <li><p>Any other lines are treated as keys whose value is the empty string.</p>
@@ -85,13 +85,13 @@ The key-value separator can be overridden.</p>
 <p>Returns a generator that reads one or more lines from
 the textual input port <em>inport</em> and returns a list of three strings:
 the current section name, the key, and the value.  If no section names have been read, the
-section name is the empty string.  When the port returns an end of file object,
-the generator returns an end of file object.
+section name is the empty string.  When the port returns an end-of-file object,
+the generator returns an end-of-file object.
 It is an error to mutate any of the strings and lists returned.</p>
 <p>The character <em>key-value-sep</em>, which defaults to <code>#\=</code>, specifies the separator
 between a key and the corresponding value.  The character <em>comment-delim</em>, which defaults
 to <code>#\;</code>, specifies the delimiter before a comment.
-It is an error if either of them are whitespace or a newline.</p>
+It is an error if either of them is whitespace or a newline.</p>
 <p>Note that it is the user's responsibility to close the port.</p>
 <p><code>(make-ini-file-accumulator</code>&nbsp;<em>outport</em> [ <em>value-delim</em> [ <em>comment-delim</em> ] ]<code>)</code></p>
 <p>Returns an accumulator that writes to
@@ -105,7 +105,7 @@ it is prefixed by the comment delimiter and a single space and written out.</p><
 </ul>
 <p>In either case, the accumulator returns an unspecified value.
 It is an error if any of these strings contains a newline.
-If the argument is an end of file object, the end of file object is returned.
+If the argument is an end-of-file object, the end-of-file object is returned.
 It is an error to call the accumulator after that.</p>
 <p>Note that it is the user's responsibility to close the port.</p>
 <p>The <em>key-value-sep</em> and <em>comment-delim</em> are treated the same as in <code>make-ini-file-generator</code>.
