@@ -52,7 +52,7 @@
      (make-generator port key-value-sep comment-delim))))
 
 (define (make-generator port key-value-sep comment-delim)
-  
+
   ;; remove whitespace from the start of the line
   (define (trim-head line)
     (let loop ((chars (string->list line)))
@@ -109,7 +109,7 @@
 
   ;; return pair of key and value
   ;;
-  ;; if line has a separator char, 
+  ;; if line has a separator char,
   ;; key is a (whitespace trimmed) symbol up to first separator char, value is a (whitespace trimmed) string
   ;;
   ;; if line doesn't have a separator char
