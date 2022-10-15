@@ -53,59 +53,42 @@
 
 (define (make-generator port key-value-sep comment-delim)
 
-  ;; remove whitespace from the start of the line
-  (define (trim-head line)
-    (let loop ((chars (string->list line)))
-      (cond
-       ((null? chars) "")
-       ((equal? #\space (car chars)) (loop (cdr chars)))
-       (else (list->string chars)))))
-
-  ;; remove whitespace from the end of the line
-  (define (trim-tail line)
-    (let loop ((chars (string->list line))
-               (chars/rev '())
-               (spaces '()))
-      (cond
-       ((null? chars)
-        (list->string (reverse chars/rev)))
-       ((equal? #\space (car chars))
-        (loop (cdr chars)
-              chars/rev
-              (cons #\space spaces)))
-       (else (loop (cdr chars)
-                   (append (list (car chars)) spaces chars/rev)
-                   '())))))
-
-  (define (trim line)
-    (trim-tail (trim-head line)))
+  ;; remove space from both ends of string
+  (define (trim str) 
+    (define (space? char) (char=? #\space char))
+    (let loop1 ((end (string-length str)))
+      (if (and (> end 0) (space? (string-ref str (- end 1))))
+        (loop1 (- end 1))
+        (let loop2 ((start 0))
+          (if (and (< start end) (space? (string-ref str start)))
+            (loop2 (+ start 1))
+            (substring str start end))))))
 
   ;; return #t if the line is a comment,
   ;; #f otherwise
   (define (comment line)
-    (let loop ((chars (string->list line)))
+    (define len (string-length line))
+    (let loop ((i 0))
       (cond
-       ((null? chars) #f)
-       ((equal? (car chars) #\space) (loop (cdr chars)))
-       ((equal? (car chars) comment-delim) #t)
+       ((>= i len) #f)
+       ((equal? (string-ref line i) #\space) (loop (+ 1 i)))
+       ((equal? (string-ref line i) comment-delim) #t)
        (else #f))))
 
-  ;; return section name as a symbol the line is a section declaration,
+  ;; return section name as a symbol if the line is a section declaration,
   ;; #f otheriwse
   (define (section line)
-    (define chars (string->list line))
-    (define first (car chars))
-    (if (equal? first #\[)
-        (let loop ((chars (cdr chars))
-                   (chars/rev '()))
-          (cond
-           ((null? chars) #f)
-           ((and (null? (cdr chars))
-                 (equal? (car chars) #\]))
-            (string->symbol (list->string (reverse chars/rev))))
-           (else (loop (cdr chars)
-                       (cons (car chars) chars/rev)))))
-        #f))
+    (define len (string-length line))
+    (cond
+      ((= len 0) #f)
+      ((not (char=? (string-ref line 0) #\[)) #f)
+      (else (let loop ((i 0))
+              (cond
+                ((>= i len) #f)
+                ((and (= i (- len 1))
+                      (char=? (string-ref line i) #\]))
+                 (string->symbol (substring line 1 (- len 1))))
+                (else (loop (+ i 1))))))))
 
   ;; return pair of key and value
   ;;
@@ -115,60 +98,45 @@
   ;; if line doesn't have a separator char
   ;; key is a #f, value is the entire line
   ;;
-  ;; if separator char is encounted multiple times, only first one is used to distinguish key from value
+  ;; if separator char is encounted multiple times, first one is used to distinguish key from value
   (define (key-value line)
-    (let loop ((chars (string->list line))
-               (key-parsed #f)
-               (first-reversed '())
-               (second-reversed '()))
+    (define len (string-length line))
+    (let loop ((i 0))
       (cond
-       ;; line parsed, return
-       ((null? chars)
-        (if key-parsed
-          (cons (string->symbol (trim-tail (list->string (reverse first-reversed))))
-                (trim-head (list->string (reverse second-reversed))))
-          (cons #f (list->string (reverse first-reversed)))))
-       ;; encountered separator for first time
-       ((and (equal? (car chars) key-value-sep)
-             (not key-parsed))
-        (loop (cdr chars)
-              #t
-              first-reversed
-              second-reversed))
-       ;; append char to either first or second, depending on if separator was seen
-       (else (loop (cdr chars)
-                   key-parsed
-                   (if key-parsed
-                       first-reversed
-                       (cons (car chars) first-reversed))
-                   (if key-parsed
-                       (cons (car chars) second-reversed)
-                       second-reversed))))))
+        ;; line parsed without encountering a separator
+        ((>= i len)
+         (cons #f 
+               line))
+        ;; encountered a (first leftmost) separator
+        ((char=? key-value-sep (string-ref line i))
+         (cons (string->symbol (trim (substring line 0 i)))
+               (if (>= (+ i 1) len)
+                 ""
+                 (trim (substring line (+ i 1) len)))))
+        (else
+          (loop (+ i 1))))))
 
   (define current-section '||)
   (define eof #f)
 
   (lambda ()
-    (call/cc
-     (lambda (k)
-       (when eof
-         (k (eof-object)))
-       (let loop ()
-         (define line (read-line port))
-         (when (eof-object? line)
-           (begin
-             (set! eof #t)
-             (k (eof-object))))
-         (let ((trimmed-line (trim line)))
-           (cond
-            ((= 0 (string-length trimmed-line))
-             (loop))
-            ((comment trimmed-line)
-             (loop))
-            ((section trimmed-line) => (lambda (section)
-                                         (set! current-section section)
-                                         (loop)))
-            ((key-value trimmed-line) => (lambda (key-value-pair)
-                                           (list current-section
-                                                 (car key-value-pair)
-                                                 (cdr key-value-pair)))))))))))
+    (or (and eof (eof-object))
+        (let loop ()
+          (define line (read-line port))
+          (if (eof-object? line)
+            (begin
+              (set! eof #t)
+              (eof-object))
+            (let ((trimmed-line (trim line)))
+              (cond
+                ((= 0 (string-length trimmed-line))
+                 (loop))
+                ((comment trimmed-line)
+                 (loop))
+                ((section trimmed-line) => (lambda (section)
+                                             (set! current-section section)
+                                             (loop)))
+                ((key-value trimmed-line) => (lambda (key-value-pair)
+                                               (list current-section
+                                                     (car key-value-pair)
+                                                     (cdr key-value-pair)))))))))))
