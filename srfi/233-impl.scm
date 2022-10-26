@@ -76,7 +76,7 @@
        (else #f))))
 
   ;; return section name as a symbol if the line is a section declaration,
-  ;; #f otheriwse
+  ;; #f otherwise
   (define (section line)
     (define len (string-length line))
     (cond
