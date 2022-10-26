@@ -54,7 +54,7 @@
 (define (make-generator port key-value-sep comment-delim)
 
   ;; remove space from both ends of string
-  (define (trim str) 
+  (define (trim str)
     (define (space? char) (char=? #\space char))
     (let loop1 ((end (string-length str)))
       (if (and (> end 0) (space? (string-ref str (- end 1))))
@@ -105,7 +105,7 @@
       (cond
         ;; line parsed without encountering a separator
         ((>= i len)
-         (cons #f 
+         (cons #f
                line))
         ;; encountered a (first leftmost) separator
         ((char=? key-value-sep (string-ref line i))
