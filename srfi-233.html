@@ -74,9 +74,9 @@ The key-value separator can be overridden.</p>
 <p>The following two procedures are provided:</p>
 <p><code>(make-ini-file-generator</code>&nbsp;<em>inport</em> [ <em>key-value-sep</em> [ <em>comment-delim</em> ] ]<code>)</code></p>
 <p>Returns a generator that reads one or more lines from
-the textual input port <em>inport</em> and returns a list of three strings:
+the textual input port <em>inport</em> and returns a list of two symbols and a string:
 the current section name, the key, and the value.  If no section names have been read, the
-section name is the empty string.  When the port returns an end-of-file object,
+section name is <code>#f</code>.  When the port returns an end-of-file object,
 the generator returns an end-of-file object.
 It is an error to mutate any of the strings and lists returned.</p>
 <p>The character <em>key-value-sep</em>, which defaults to <code>#\=</code>, specifies the separator
@@ -89,7 +89,7 @@ It is an error if either of them is whitespace or a newline.</p>
 the textual output port <em>outport</em>.
 <ul>
 <li><p>If the argument passed to the accumulator
-is a list of three strings, a key-value line, preceded if necessary by a section line,
+is a list of three elements, a key-value line, preceded if necessary by a section line,
 is written.</p></li>
 <li><p>If the argument is a single string,
 it is prefixed by the comment delimiter and a single space and written out.</p></li>
@@ -112,29 +112,13 @@ quiet=/qa
 
 [install]
 allusers=true
-as_admin_username=admin
-as_instance=localhost
 applicationusers=allusers
-cadnode=businessabcdef
-cadport=6410
 clientauditingport=6420
-clientlanguage=en
-clustercms=false
 databasedb=boe120
-databasepwd_sqlanywhereroot=password1
-databaseserver_audit=localhost
 enablelogfile=true
-enableservers=true
-install.lp.en.selected=true
 install.lp.fr.selected=true
-installdbtype=sql
-installmode=new
 installswitch=server
-install_db_type=sqlanywhere
-mysqlport=3306
 nsport=6400
-privileged=true
-username=business objects
 website_metabase_number=true
 
 [features]
@@ -146,34 +130,19 @@ a character input stream containing this example will
 return a generator which generates the following lists:
 
 <pre>
-("" "last_modified_date", "2022-08-10")
-("other" "quiet" "/qa")
-("install" "allusers" "true")
-("install" "as_admin_username" "admin")
-("install" "as_instance" "localhost")
-("install" "applicationusers" "allusers")
-("install" "cadnode" "businessabcdef")
-("install" "cadport" "6410")
-("install" "clientauditingport" "6420")
-("install" "clientlanguage" "en")
-("install" "clustercms" "false")
-("install" "databasedb" "boe120")
-("install" "databasepwd_sqlanywhereroot" "password1")
-("install" "databaseserver_audit" "localhost")
-("install" "enablelogfile" "true")
-("install" "enableservers" "true")
-("install" "install.lp.en.selected" "true")
-("install" "install.lp.fr.selected" "true")
-("install" "installdbtype" "sql")
-("install" "installmode" "new")
-("install" "installswitch" "server")
-("install" "install_db_type" "sqlanywhere")
-("install" "mysqlport" "3306")
-("install" "nsport" "6400")
-("install" "privileged" "true")
-("install" "username" "business objects")
-("install" "website_metabase_number" "true")
-("features" "remove" "wcadotnet,webapplicationcontainer")
+(#f last_modified_date 2022-08-10)
+(other quiet "/qa")
+(features remove "wcadotnet,webapplicationcontainer")
+(install allusers "true")
+(install applicationusers "allusers")
+(install clientauditingport "6420")
+(install databasedb "boe120")
+(install enablelogfile "true")
+(install install.lp.fr.selected "true")
+(install installswitch "server")
+(install nsport "6400")
+(install website_metabase_number "true")
+(features remove "wcadotnet,webapplicationcontainer")
 </pre>
 
 <h2 id="implementation">Implementation</h2>
