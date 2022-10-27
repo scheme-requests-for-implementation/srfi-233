@@ -63,12 +63,12 @@ Sections do not nest.  The name of a section is the characters between the brack
 </li>
 <li><p>Other lines containing <code>=</code> are treated as key-value pairs within the current section or, if
 they precede any section line, as key-value pairs belonging to a section
-whose name is the empty string.
+whose name is <code>#f</code>.
 Whitespace immediately before or after the <code>=</code> is ignored.
 If there is more than one key-value separator, all but the first are considered part of the value.
 The key-value separator can be overridden.</p>
 </li>
-<li><p>Any other lines are treated as keys whose value is the empty string.</p>
+<li><p>Any other lines are treated as keys whose value is <code>#f</code>.</p>
 </li>
 </ul>
 <p>The following two procedures are provided:</p>
